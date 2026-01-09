@@ -20,4 +20,9 @@ const server = serve({
   },
 });
 
+const pollerProc = Bun.spawn({
+  cmd: ["bun", "./src/lib/poller"],
+  stdout: "inherit",
+});
+
 console.log(`🚀 Server running at ${server.url}`);

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `xpGains_playerId_skill_unique` ON `xpGains` (`playerId`,`skill`);

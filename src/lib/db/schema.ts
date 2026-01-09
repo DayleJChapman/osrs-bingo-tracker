@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { int, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
 export const players = sqliteTable("players", {
   id: int().primaryKey(),
@@ -24,3 +24,16 @@ export const teams = sqliteTable("teams", {
 export const teamsRelations = relations(teams, ({ many }) => ({
   members: many(players),
 }));
+
+const trackedSkills = ["hunter", "smithing", "slayer", "cooking"] as const;
+export const xpGains = sqliteTable(
+  "xpGains",
+  {
+    id: int().primaryKey(),
+    playerId: int().notNull(),
+    teamId: int().notNull(),
+    skill: text({ enum: trackedSkills }).notNull(),
+    amount: int().notNull(),
+  },
+  (t) => [unique().on(t.playerId, t.skill)],
+);

@@ -19,6 +19,7 @@ export const playersRelations = relations(players, ({ one }) => ({
 export const teams = sqliteTable("teams", {
   id: int().primaryKey(),
   name: text().notNull().unique(),
+  points: int().notNull().default(0),
 });
 
 export const teamsRelations = relations(teams, ({ many }) => ({
@@ -37,3 +38,19 @@ export const xpGains = sqliteTable(
   },
   (t) => [unique().on(t.playerId, t.skill)],
 );
+
+export const tasks = sqliteTable("tasks", {
+  id: int().primaryKey(),
+  name: text().notNull(),
+  tier: int().notNull(),
+  pointValue: int().notNull(),
+});
+
+const taskStateValues = ["COMPLETE", "INCOMPLETE", "BLOCKED"] as const;
+export const taskStates = sqliteTable("taskStates", {
+  id: int().primaryKey(),
+  taskId: int().notNull(),
+  teamId: int().notNull(),
+  state: text({ enum: taskStateValues }).default("INCOMPLETE"),
+  completedAt: int({ mode: "timestamp" }),
+});

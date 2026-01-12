@@ -1,0 +1,59 @@
+[
+  {
+    "type": 0,
+    "content": "",
+    "mentions": [],
+    "mention_roles": [],
+    "attachments": [
+      {
+        "id": "1450503668599099534",
+        "filename": "image.png",
+        "size": 2338,
+        "url": "https://cdn.discordapp.com/attachments/1448391543252717770/1450503668599099534/image.png?ex=69665ecf&is=69650d4f&hm=8119abfaa7b54ca50d2a0629cb69c4a8211afc75faa0197f06914f7b66874df1&",
+        "proxy_url": "https://media.discordapp.net/attachments/1448391543252717770/1450503668599099534/image.png?ex=69665ecf&is=69650d4f&hm=8119abfaa7b54ca50d2a0629cb69c4a8211afc75faa0197f06914f7b66874df1&",
+        "width": 220,
+        "height": 150,
+        "content_type": "image/webp",
+        "original_content_type": "image/png",
+        "content_scan_version": 3,
+        "placeholder": "DAgCBYCPiJiDaZdodnh3dX3P3ffc",
+        "placeholder_version": 1
+      }
+    ],
+    "embeds": [
+      {
+        "author": {
+          "id": "",
+          "username": "blob870"
+        },
+        "description": "Just got [Lightbearer](https://oldschool.runescape.wiki/w/Special:Search?search=Lightbearer) from [Tombs of Amascut](https://oldschool.runescape.wiki/w/Special:Search?search=Tombs%20of%20Amascut)"
+      }
+    ],
+    "timestamp": "2025-12-16T15:03:43.942000+00:00",
+    "edited_timestamp": null,
+    "flags": 0,
+    "components": [],
+    "id": "1450503669828161546",
+    "channel_id": "1448391543252717770",
+    "author": {
+      "id": "204967171380609025",
+      "username": "Rare Drop Notificator",
+      "avatar": "e99da50aa6a828420c4d1d157d7eb6dc",
+      "discriminator": "0",
+      "public_flags": 0,
+      "flags": 0,
+      "banner": null,
+      "accent_color": null,
+      "global_name": "Blob870",
+      "avatar_decoration_data": null,
+      "collectibles": null,
+      "display_name_styles": null,
+      "banner_color": null,
+      "clan": null,
+      "primary_guild": null
+    },
+    "pinned": false,
+    "mention_everyone": false,
+    "tts": false
+  }
+]

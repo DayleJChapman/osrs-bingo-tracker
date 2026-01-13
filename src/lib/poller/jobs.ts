@@ -10,12 +10,12 @@ interface PollerJob {
 
 export const jobs: PollerJob[] = [
   {
-    pattern: "* */1 * * *",
+    pattern: "@hourly",
     opts: { name: "scrape_wom" },
     fn: scrapeWOM,
   },
   {
-    pattern: "* */1 * * *",
+    pattern: "@hourly",
     opts: { name: "scrape_disord_drops" },
     fn: scrapeDiscord,
   },

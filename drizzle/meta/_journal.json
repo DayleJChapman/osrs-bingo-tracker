@@ -43,6 +43,13 @@
       "when": 1768244973894,
       "tag": "0005_sour_iron_patriot",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1768335974572,
+      "tag": "0006_fair_night_thrasher",
+      "breakpoints": true
     }
   ]
 }

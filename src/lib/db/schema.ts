@@ -7,6 +7,7 @@ export const players = sqliteTable("players", {
   displayName: text().notNull().unique(),
   womId: int().notNull().unique(),
   teamId: int().notNull(),
+  isTeamCaptain: int({ mode: "boolean" }).default(false),
 });
 
 export const playersRelations = relations(players, ({ one }) => ({

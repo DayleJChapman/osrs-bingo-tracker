@@ -48,6 +48,8 @@ async function checkTeamTasks(teamId: number) {
       console.log(`Task: ${task.name} - Tier ${tierKey}: ${state}`);
       prevTierState = state;
     }
+
+    console.log();
   }
 
   console.log(`Total Points: ${totalPoints}`);
@@ -77,9 +79,11 @@ async function getTaskMetadata(teamId: number, taskName: string) {
     .where(and(eq(taskMetadata.taskId, id), eq(taskMetadata.teamId, teamId)));
 }
 
-const teamsQuery = await db.select().from(teams);
+const teamsQuery = await db.select().from(teams).where(eq(teams.id, 3));
+// const teamsQuery = await db.select().from(teams);
 await seedDrops();
+
 for (const team of teamsQuery) {
-  console.log(`Team ${team.name}`);
+  console.log(`Team: ${team.name}\n`);
   await checkTeamTasks(team.id);
 }

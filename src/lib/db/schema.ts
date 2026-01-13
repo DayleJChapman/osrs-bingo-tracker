@@ -19,6 +19,7 @@ export const playersRelations = relations(players, ({ one }) => ({
 export const teams = sqliteTable("teams", {
   id: int().primaryKey(),
   name: text().notNull().unique(),
+  points: int().notNull().default(0),
 });
 
 export const teamsRelations = relations(teams, ({ many }) => ({
@@ -36,4 +37,56 @@ export const xpGains = sqliteTable(
     amount: int().notNull(),
   },
   (t) => [unique().on(t.playerId, t.skill)],
+);
+
+export const tasks = sqliteTable(
+  "tasks",
+  {
+    id: int().primaryKey(),
+    name: text().notNull(),
+    tier: int().notNull(),
+    pointValue: int().notNull(),
+  },
+  (t) => [unique().on(t.name, t.tier)],
+);
+
+const taskStateValues = ["COMPLETE", "INCOMPLETE", "BLOCKED"] as const;
+export type TaskStates = (typeof taskStateValues)[number];
+export const taskStates = sqliteTable(
+  "taskStates",
+  {
+    id: int().primaryKey(),
+    taskId: int().notNull(),
+    teamId: int().notNull(),
+    state: text({ enum: taskStateValues }).default("INCOMPLETE"),
+    completedAt: int({ mode: "timestamp" }),
+  },
+  (t) => [unique().on(t.taskId, t.teamId)],
+);
+
+export const taskMetadata = sqliteTable("taskMetadata", {
+  id: int().primaryKey(),
+  taskId: int().notNull(),
+  teamId: int().notNull(),
+  metadata: text({ mode: "json" }).notNull(),
+});
+
+export const drops = sqliteTable("drops", {
+  id: int().primaryKey(),
+  teamId: int().notNull(),
+  playerId: int().notNull(),
+  source: text().notNull(),
+  item: text().notNull(),
+});
+
+export const bossKc = sqliteTable(
+  "bossKc",
+  {
+    id: int().primaryKey(),
+    playerId: int().notNull(),
+    teamId: int().notNull(),
+    boss: text().notNull(),
+    amount: int().notNull().default(0),
+  },
+  (t) => [unique().on(t.playerId, t.boss)],
 );

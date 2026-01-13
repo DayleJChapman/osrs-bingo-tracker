@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `tasks_name_tier_unique` ON `tasks` (`name`,`tier`);

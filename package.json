@@ -15,6 +15,7 @@
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.2.6",
     "@wise-old-man/utils": "^4.0.8",
     "bun-plugin-tailwind": "^0.1.2",
     "class-variance-authority": "^0.7.1",
@@ -23,9 +24,10 @@
     "discord.js": "^14.25.1",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.11.3",
-    "lucide-react": "^0.545.0",
+    "lucide-react": "^0.562.0",
     "react": "^19",
     "react-dom": "^19",
+    "react-router-dom": "^7.12.0",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {

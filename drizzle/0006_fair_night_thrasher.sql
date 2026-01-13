@@ -1,0 +1,1 @@
+ALTER TABLE `players` ADD `isTeamCaptain` integer DEFAULT false;

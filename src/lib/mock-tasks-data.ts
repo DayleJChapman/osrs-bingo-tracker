@@ -2,19 +2,22 @@
 
 import type { TaskName } from "@/types";
 
-export type TierDetail = {
+export type TierDetail = Readonly<{
   tier: number;
   points: number;
   description: string;
   requirements: string[];
-};
+}>;
 
-export type TaskDetail = {
+export type TaskDetail = Readonly<{
   name: TaskName;
   label: string;
   description: string;
+  skills?: readonly string[];
+  drops?: readonly string[];
+  bosses?: readonly string[];
   tiers: TierDetail[];
-};
+}>;
 
 export const mockTaskDetails: TaskDetail[] = [
   {
@@ -98,7 +101,8 @@ export const mockTaskDetails: TaskDetail[] = [
       {
         tier: 2,
         points: 30,
-        description: "Earn 300 pull points and obtain a fishing/fletching drop.",
+        description:
+          "Earn 300 pull points and obtain a fishing/fletching drop.",
         requirements: [
           "300 pull points",
           "One of: Bow String Spool, Fletching Knife, Greenman Mask, Tackle Box, Big Harpoonfish, Fish Barrel, Tome of Water, Dragon Harpoon",
@@ -124,7 +128,8 @@ export const mockTaskDetails: TaskDetail[] = [
       {
         tier: 1,
         points: 55,
-        description: "Obtain 1 seed point (armour/weapon seed = 1, enhanced = 3).",
+        description:
+          "Obtain 1 seed point (armour/weapon seed = 1, enhanced = 3).",
         requirements: [
           "Crystal Armour Seed (1 pt)",
           "Crystal Weapon Seed (1 pt)",
@@ -159,10 +164,7 @@ export const mockTaskDetails: TaskDetail[] = [
         tier: 1,
         points: 10,
         description: "Obtain any quartz or awakener's orb.",
-        requirements: [
-          "Awakener's Orb",
-          "Ice/Smoke/Shadow/Blood Quartz",
-        ],
+        requirements: ["Awakener's Orb", "Ice/Smoke/Shadow/Blood Quartz"],
       },
       {
         tier: 2,
@@ -273,7 +275,8 @@ export const mockTaskDetails: TaskDetail[] = [
       {
         tier: 2,
         points: 25,
-        description: "Earn 200 contract points and obtain 2 Guild Hunter pieces.",
+        description:
+          "Earn 200 contract points and obtain 2 Guild Hunter pieces.",
         requirements: [
           "200 contract points",
           "2 Guild Hunter pieces (Headgear, Top, Legs, or Boots)",
@@ -289,15 +292,17 @@ export const mockTaskDetails: TaskDetail[] = [
         tier: 4,
         points: 20,
         description: "Earn 400 contract points and 4500 Foundry reputation.",
-        requirements: ["400 contract points", "4,500 Giant's Foundry reputation"],
+        requirements: [
+          "400 contract points",
+          "4,500 Giant's Foundry reputation",
+        ],
       },
     ],
   },
   {
     name: "NICE_ROD",
     label: "Nice Rod",
-    description:
-      "Collect powerful staves and rods from various activities.",
+    description: "Collect powerful staves and rods from various activities.",
     tiers: [
       {
         tier: 1,

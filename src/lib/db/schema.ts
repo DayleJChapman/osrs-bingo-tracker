@@ -69,8 +69,9 @@ export const taskMetadata = sqliteTable("taskMetadata", {
   id: int().primaryKey(),
   taskId: int().notNull(),
   teamId: int().notNull(),
-  metadata: text({ mode: "json" }).notNull(),
+  metadata: text({ mode: "json" }).notNull().$type<Record<string, unknown>>(),
 });
+export type TaskMetadataRecord = typeof taskMetadata.$inferSelect;
 
 export const drops = sqliteTable("drops", {
   id: int().primaryKey(),

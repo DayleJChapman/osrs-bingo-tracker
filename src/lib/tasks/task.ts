@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { tasks, taskStates } from "../db/schema";
+import { tasks } from "../db/schema";
 import { descriptions } from "./descriptions";
 import { handlers } from "./handlers";
 
@@ -328,55 +328,3 @@ export const taskList = {
     },
   },
 };
-
-export async function seedTasks() {
-  for (const task of Object.values(taskList)) {
-    for (const [tierNumber, tierVal] of Object.entries(task.tiers)) {
-      console.log(task.name, tierNumber, ":", tierVal);
-
-      const result = await db
-        .insert(tasks)
-        .values({
-          name: task.name,
-          pointValue: tierVal.points as number,
-          tier: Number(tierNumber),
-        })
-        .onConflictDoUpdate({
-          target: [tasks.name, tasks.tier],
-          set: { pointValue: tierVal.points as number },
-        })
-        .returning({ id: tasks.id });
-
-      const id = result[0]!.id;
-
-      await db
-        .insert(taskStates)
-        .values([
-          {
-            taskId: id,
-            teamId: 1,
-            state: "INCOMPLETE",
-          },
-          {
-            taskId: id,
-            teamId: 2,
-            state: "INCOMPLETE",
-          },
-          {
-            taskId: id,
-            teamId: 3,
-            state: "INCOMPLETE",
-          },
-          {
-            taskId: id,
-            teamId: 4,
-            state: "INCOMPLETE",
-          },
-        ])
-        .onConflictDoUpdate({
-          target: [taskStates.taskId, taskStates.teamId],
-          set: { state: "INCOMPLETE" },
-        });
-    }
-  }
-}

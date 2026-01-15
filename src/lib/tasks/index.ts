@@ -5,13 +5,14 @@ import {
   drops,
   taskMetadata,
   tasks,
-  taskStates,
   teams,
+  tierCompletionStates,
+  tiers,
   xpGains,
-  type TaskStates,
 } from "../db/schema";
 import { taskList } from "./task";
 import { incr } from "../utils";
+import type { TaskStates } from "../db/schema/tasks";
 
 async function checkTeamTasks(teamId: number) {
   console.log(`Checking status for team id ${teamId}`);
@@ -37,8 +38,8 @@ async function checkTeamTasks(teamId: number) {
     const taskMetadata = await getTaskMetadata(teamId, task.name);
 
     let prevTierState: TaskStates = "COMPLETE";
-    for (const [tier, tierData] of Object.entries(task.tiers)) {
-      const taskData = await getTaskByName(task.name, Number(tier));
+    for (const [, tierData] of Object.entries(task.tiers)) {
+      const taskData = await getTaskByName(task.name);
       if (!taskData) throw new Error("Could not find task data");
 
       const currentState = await getTaskState(teamId, taskData.id);
@@ -85,9 +86,14 @@ async function updateTaskState({
   state: TaskStates;
 }) {
   await db
-    .update(taskStates)
+    .update(tierCompletionStates)
     .set({ state })
-    .where(and(eq(taskStates.teamId, teamId), eq(taskStates.taskId, taskId)));
+    .where(
+      and(
+        eq(tierCompletionStates.teamId, teamId),
+        eq(tierCompletionStates.taskId, taskId),
+      ),
+    );
 }
 
 async function addTaskPoints(teamId: number, points: number) {
@@ -101,9 +107,14 @@ async function addTaskPoints(teamId: number, points: number) {
 
 async function getTaskState(teamId: number, taskId: number) {
   const res = await db
-    .select({ state: taskStates.state })
-    .from(taskStates)
-    .where(and(eq(taskStates.teamId, teamId), eq(taskStates.taskId, taskId)));
+    .select({ state: tierCompletionStates.state })
+    .from(tierCompletionStates)
+    .where(
+      and(
+        eq(tierCompletionStates.teamId, teamId),
+        eq(tierCompletionStates.taskId, taskId),
+      ),
+    );
 
   return res[0]?.state ?? null;
 }
@@ -121,7 +132,7 @@ async function getBossKc(teamId: number) {
 }
 
 async function getTaskMetadata(teamId: number, taskName: string) {
-  const task = await getTaskByName(taskName, 1);
+  const task = await getTaskByName(taskName);
   if (!task) return null;
 
   const res = await db
@@ -134,12 +145,8 @@ async function getTaskMetadata(teamId: number, taskName: string) {
   return res[0] ?? null;
 }
 
-async function getTaskByName(name: string, tier: number) {
-  const res = await db
-    .select()
-    .from(tasks)
-    .where(and(eq(tasks.name, name), eq(tasks.tier, tier)));
-
+async function getTaskByName(name: string) {
+  const res = await db.select().from(tasks).where(eq(tasks.name, name));
   return res[0] ?? null;
 }
 
@@ -156,15 +163,18 @@ export async function updateAllTeamsTasks() {
 
 async function getCompletedTaskPoints(teamId: number) {
   const completedTaskIds = await db
-    .select({ taskId: taskStates.taskId })
-    .from(taskStates)
+    .select({ taskId: tierCompletionStates.taskId })
+    .from(tierCompletionStates)
     .where(
-      and(eq(taskStates.teamId, teamId), eq(taskStates.state, "COMPLETE")),
+      and(
+        eq(tierCompletionStates.teamId, teamId),
+        eq(tierCompletionStates.state, "COMPLETE"),
+      ),
     );
 
   const result = await db
-    .select({ totalPoints: sum(tasks.pointValue) })
-    .from(tasks)
+    .select({ totalPoints: sum(tiers.points) })
+    .from(tiers)
     .where(
       inArray(
         tasks.id,

@@ -7,6 +7,7 @@
     "dev": "bun --hot src/index.ts",
     "start": "NODE_ENV=production bun src/index.ts",
     "build": "bun run build.ts",
+    "typecheck": "bunx tsc --noEmit",
     "db:migrate:gen": "bunx --bun drizzle-kit generate",
     "db:migrate": "bun run ./src/lib/db/migrate.ts",
     "db:seed": "bun run ./src/lib/db/seed.ts"

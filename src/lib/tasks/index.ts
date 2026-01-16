@@ -14,7 +14,7 @@ import { taskList } from "./task";
 import { incr } from "../utils";
 import type { TaskStates } from "../db/schema/tasks";
 
-async function checkTeamTasks(teamId: number) {
+export async function checkTeamTasks(teamId: number) {
   console.log(`Checking status for team id ${teamId}`);
   let totalPoints = 0;
   const [drops, skills, bosses] = await Promise.all([
@@ -38,12 +38,9 @@ async function checkTeamTasks(teamId: number) {
     const taskMetadata = await getTaskMetadata(teamId, task.name);
 
     let prevTierState: TaskStates = "COMPLETE";
-    for (const [, tierData] of Object.entries(task.tiers)) {
+    for (const [i, tierData] of Object.entries(task.tiers)) {
       const taskData = await getTaskByName(task.name);
       if (!taskData) throw new Error("Could not find task data");
-
-      const currentState = await getTaskState(teamId, taskData.id);
-      if (currentState === "COMPLETE") continue;
 
       const isComplete = await tierData.isComplete({
         drops: filteredDrops,
@@ -63,8 +60,11 @@ async function checkTeamTasks(teamId: number) {
         }
       }
 
+      const tierId = await getTierId(taskData.id, Number(i));
+      if (!tierId) throw new Error("Could not find tier id");
       await updateTaskState({
         taskId: taskData.id,
+        tierId,
         teamId,
         state,
       });
@@ -76,13 +76,23 @@ async function checkTeamTasks(teamId: number) {
   console.log(`Done checking task status for team ${teamId}`);
 }
 
+async function getTierId(taskId: number, tier: number) {
+  const res = await db
+    .select({ id: tiers.id })
+    .from(tiers)
+    .where(and(eq(tiers.taskId, taskId), eq(tiers.number, tier)));
+  return res[0]?.id ?? null;
+}
+
 async function updateTaskState({
   teamId,
   taskId,
+  tierId,
   state,
 }: {
   teamId: number;
   taskId: number;
+  tierId: number;
   state: TaskStates;
 }) {
   await db
@@ -91,6 +101,7 @@ async function updateTaskState({
     .where(
       and(
         eq(tierCompletionStates.teamId, teamId),
+        eq(tierCompletionStates.tierId, tierId),
         eq(tierCompletionStates.taskId, taskId),
       ),
     );
@@ -105,14 +116,23 @@ async function addTaskPoints(teamId: number, points: number) {
     .where(eq(teams.id, teamId));
 }
 
-async function getTaskState(teamId: number, taskId: number) {
+async function getTierState(teamId: number, taskId: number, tier: number) {
+  const tierData = await db
+    .select({ tierId: tiers.id })
+    .from(tiers)
+    .where(and(eq(tiers.taskId, taskId), eq(tiers.number, tier)));
+
+  const tierId = tierData[0]?.tierId;
+  if (!tierId) throw new Error("Could not find tier id");
+
   const res = await db
-    .select({ state: tierCompletionStates.state })
+    .select()
     .from(tierCompletionStates)
     .where(
       and(
         eq(tierCompletionStates.teamId, teamId),
         eq(tierCompletionStates.taskId, taskId),
+        eq(tierCompletionStates.tierId, tierId),
       ),
     );
 
@@ -162,8 +182,8 @@ export async function updateAllTeamsTasks() {
 }
 
 async function getCompletedTaskPoints(teamId: number) {
-  const completedTaskIds = await db
-    .select({ taskId: tierCompletionStates.taskId })
+  const completedTierIds = await db
+    .select({ tierId: tierCompletionStates.tierId })
     .from(tierCompletionStates)
     .where(
       and(
@@ -177,8 +197,8 @@ async function getCompletedTaskPoints(teamId: number) {
     .from(tiers)
     .where(
       inArray(
-        tasks.id,
-        completedTaskIds.map(({ taskId }) => taskId),
+        tiers.id,
+        completedTierIds.map(({ tierId }) => tierId),
       ),
     );
 

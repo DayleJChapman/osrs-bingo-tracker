@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "bun --hot src/index.ts",
-    "start": "NODE_ENV=production bun src/index.ts",
+    "start": "bun src/index.ts",
     "build": "bun run build.ts",
     "typecheck": "bunx tsc --noEmit",
     "db:migrate:gen": "bunx --bun drizzle-kit generate",
     "db:migrate": "bun run ./src/lib/db/migrate.ts",
-    "db:seed": "bun run ./src/lib/db/seed.ts"
+    "db:seed": "bun run ./src/lib/db/seed.ts",
+    "docker:build": "docker build -f docker/Dockerfile -t osrs-bingo-tracker:latest ."
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.7",

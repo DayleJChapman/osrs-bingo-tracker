@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
-import { drops, taskStates, teams, type TaskStates } from "@/lib/db/schema";
+import { drops, teams, tierCompletionStates } from "@/lib/db/schema";
+import type { TaskStates } from "@/lib/db/schema/tasks";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
@@ -77,15 +78,17 @@ teamsRouter.get("/:teamId/tasks", async (c) => {
     throw new HTTPException(422, { message: `Invalid id ${teamId}` });
   }
 
-  const queryRes = await db
-    .select()
-    .from(taskStates)
-    .where(
-      and(
-        eq(taskStates.teamId, Number(teamId)),
-        state ? eq(taskStates.state, state as TaskStates) : undefined,
-      ),
-    );
+  const queryRes = await db.query.tierCompletionStates.findMany({
+    where: and(
+      eq(tierCompletionStates.teamId, Number(teamId)),
+      state ? eq(tierCompletionStates.state, state as TaskStates) : undefined,
+    ),
+    with: {
+      team: true,
+      task: true,
+      tier: true,
+    },
+  });
 
   console.log(queryRes);
   return c.json(queryRes);

@@ -36,6 +36,22 @@ export type Task = {
   pointValue: number;
 };
 
+export type TierDetail = {
+  description: string;
+  requirements: string[];
+  points: number;
+};
+export type TaskDetail = {
+  name: string;
+  label: string;
+  description: string;
+  bosses: string[];
+  skills: string[];
+  drops: string[];
+  tiers: Record<string, TierDetail>;
+};
+export type TaskList = Record<string, TaskDetail>;
+
 // The 9 bingo tasks
 export const TASK_NAMES = [
   "DELVE",

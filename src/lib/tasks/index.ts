@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, ne, sum } from "drizzle-orm";
 import { db } from "../db";
 import {
   bossKc,
@@ -6,13 +6,18 @@ import {
   taskMetadata,
   tasks,
   teams,
+  tierCompletionStates,
+  tiers,
   xpGains,
-  type TaskStates,
 } from "../db/schema";
 import { taskList } from "./task";
-import { scrapeDiscord, seedDrops } from "../drops";
+import { incr } from "../utils";
+import type { TaskStates } from "../db/schema/tasks";
+import { messageBuilder } from "../discord/messages";
+import { sendWebhookMessage } from "../discord";
 
-async function checkTeamTasks(teamId: number) {
+export async function checkTeamTasks(teamId: number) {
+  console.log(`Checking status for team id ${teamId}`);
   let totalPoints = 0;
   const [drops, skills, bosses] = await Promise.all([
     getDrops(teamId),
@@ -21,38 +26,144 @@ async function checkTeamTasks(teamId: number) {
   ]);
 
   for (const [, task] of Object.entries(taskList)) {
-    const filteredDrops = drops.filter((v) => task.drops.includes(v.item));
-    const filteredSkills = skills.filter((v) => task.skills.includes(v.skill));
-    const filteredBosses = bosses.filter((v) => task.bosses.includes(v.boss));
+    // type casting to 'never' is dumb but it shuts up TSC
+    const filteredDrops = drops.filter((v) =>
+      task.drops.includes(v.item as never),
+    );
+    const filteredSkills = skills.filter((v) =>
+      task.skills.includes(v.skill as never),
+    );
+    const filteredBosses = bosses.filter((v) =>
+      task.bosses.includes(v.boss as never),
+    );
+
     const taskMetadata = await getTaskMetadata(teamId, task.name);
 
     let prevTierState: TaskStates = "COMPLETE";
-    for (const [tierKey, tier] of Object.entries(task.tiers)) {
-      let state: TaskStates = "INCOMPLETE";
-      const isComplete = await tier.isComplete({
+    for (const [i, tierData] of Object.entries(task.tiers)) {
+      const taskData = await getTaskByName(task.name);
+      if (!taskData) throw new Error("Could not find task data");
+      const currentState = await getTierState(teamId, taskData.id, Number(i));
+      console.log(`${taskData.name} ${i}:`, currentState);
+
+      const isComplete = await tierData.isComplete({
         drops: filteredDrops,
         skills: filteredSkills,
         bosses: filteredBosses,
-        metadata: taskMetadata[0]?.metadata ?? {},
+        metadata: taskMetadata?.metadata,
       });
 
+      let state: TaskStates = "INCOMPLETE";
       if (isComplete) {
         if (prevTierState === "COMPLETE") {
           state = "COMPLETE";
-          totalPoints += tier.points;
+          await addTaskPoints(teamId, tierData.points);
+          totalPoints += tierData.points;
         } else {
           state = "BLOCKED";
         }
       }
 
-      console.log(`Task: ${task.name} - Tier ${tierKey}: ${state}`);
-      prevTierState = state;
-    }
+      const tierId = await getTierId(taskData.id, Number(i));
+      if (!tierId) throw new Error("Could not find tier id");
+      await updateTaskState({
+        taskId: taskData.id,
+        tierId,
+        teamId,
+        state,
+      });
 
-    console.log();
+      prevTierState = state;
+
+      if (currentState !== "COMPLETE" && state === "COMPLETE") {
+        const teamName = await getTeamName(teamId);
+        const messageData = messageBuilder.tierComplete({
+          team: teamName,
+          task: task,
+          tier: tierData,
+          number: Number(i),
+        });
+        await sendWebhookMessage(messageData);
+      }
+    }
   }
 
-  console.log(`Total Points: ${totalPoints}`);
+  console.log(`Done checking task status for team ${teamId}`);
+}
+
+async function getTeamName(teamId: number) {
+  const res = await db
+    .select({ name: teams.name })
+    .from(teams)
+    .where(eq(teams.id, teamId));
+  return res[0]?.name ?? "";
+}
+
+async function getTierId(taskId: number, tier: number) {
+  const res = await db
+    .select({ id: tiers.id })
+    .from(tiers)
+    .where(and(eq(tiers.taskId, taskId), eq(tiers.number, tier)));
+  return res[0]?.id ?? null;
+}
+
+async function updateTaskState({
+  teamId,
+  taskId,
+  tierId,
+  state,
+}: {
+  teamId: number;
+  taskId: number;
+  tierId: number;
+  state: TaskStates;
+}) {
+  await db
+    .update(tierCompletionStates)
+    .set({ state })
+    .where(
+      and(
+        eq(tierCompletionStates.teamId, teamId),
+        eq(tierCompletionStates.tierId, tierId),
+        eq(tierCompletionStates.taskId, taskId),
+      ),
+    );
+}
+
+async function addTaskPoints(teamId: number, points: number) {
+  if (points <= 0) throw new Error(`Points must be a positive int`);
+
+  await db
+    .update(teams)
+    .set({ points: incr(teams.points, points) })
+    .where(eq(teams.id, teamId));
+}
+
+export async function getTierState(
+  teamId: number,
+  taskId: number,
+  tier: number,
+) {
+  const tierData = await db
+    .select({ tierId: tiers.id })
+    .from(tiers)
+    .where(and(eq(tiers.taskId, taskId), eq(tiers.number, tier)));
+
+  const tierId = tierData[0]?.tierId;
+  if (!tierId) throw new Error("Could not find tier id");
+
+  const res = await db
+    .select()
+    .from(tierCompletionStates)
+    .where(
+      and(
+        eq(tierCompletionStates.teamId, teamId),
+        eq(tierCompletionStates.taskId, taskId),
+        eq(tierCompletionStates.tierId, tierId),
+      ),
+    );
+
+  return res[0]?.state ?? null;
 }
 
 async function getDrops(teamId: number) {
@@ -68,22 +179,81 @@ async function getBossKc(teamId: number) {
 }
 
 async function getTaskMetadata(teamId: number, taskName: string) {
-  const taskQuery = await db
-    .select({ id: tasks.id })
-    .from(tasks)
-    .where(eq(tasks.name, taskName));
-  const id = taskQuery[0]!.id;
-  return db
+  const task = await getTaskByName(taskName);
+  if (!task) return null;
+
+  const res = await db
     .select()
     .from(taskMetadata)
-    .where(and(eq(taskMetadata.taskId, id), eq(taskMetadata.teamId, teamId)));
+    .where(
+      and(eq(taskMetadata.taskId, task.id), eq(taskMetadata.teamId, teamId)),
+    );
+
+  return res[0] ?? null;
 }
 
-const teamsQuery = await db.select().from(teams).where(eq(teams.id, 3));
-// const teamsQuery = await db.select().from(teams);
-await seedDrops();
+async function getTaskByName(name: string) {
+  const res = await db.select().from(tasks).where(eq(tasks.name, name));
+  return res[0] ?? null;
+}
 
-for (const team of teamsQuery) {
-  console.log(`Team: ${team.name}\n`);
-  await checkTeamTasks(team.id);
+export async function updateAllTeamsTasks() {
+  console.log(`Checking task status of all teams`);
+  const teamsQuery = await db.select({ id: teams.id }).from(teams);
+
+  await Promise.all(
+    teamsQuery.map(async (team) => {
+      await checkTeamTasks(team.id);
+    }),
+  );
+}
+
+async function getCompletedTaskPoints(teamId: number) {
+  const completedTierIds = await db
+    .select({ tierId: tierCompletionStates.tierId })
+    .from(tierCompletionStates)
+    .where(
+      and(
+        eq(tierCompletionStates.teamId, teamId),
+        eq(tierCompletionStates.state, "COMPLETE"),
+      ),
+    );
+
+  const result = await db
+    .select({ totalPoints: sum(tiers.points) })
+    .from(tiers)
+    .where(
+      inArray(
+        tiers.id,
+        completedTierIds.map(({ tierId }) => tierId),
+      ),
+    );
+
+  return Number(result[0]?.totalPoints ?? 0);
+}
+
+async function verifyTeamPoints(teamId: number) {
+  const totalPoints = await getCompletedTaskPoints(teamId);
+
+  const updated = await db
+    .update(teams)
+    .set({ points: totalPoints })
+    .where(and(eq(teams.id, teamId), ne(teams.points, totalPoints)))
+    .returning();
+
+  if (updated.length > 0) {
+    const updatedTeam = updated[0]!;
+    console.log(`Points for team ${updatedTeam.name} were out of sync`);
+  }
+}
+
+export async function verifyPoints() {
+  console.log(`Verifying points are correct`);
+  const teamsQuery = await db.select({ id: teams.id }).from(teams);
+
+  await Promise.all(
+    teamsQuery.map(async (team) => {
+      await verifyTeamPoints(team.id);
+    }),
+  );
 }

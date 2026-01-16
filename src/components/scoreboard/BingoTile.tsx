@@ -13,13 +13,19 @@ export function BingoTile({ taskName, tierStates, className }: BingoTileProps) {
   const points = TASK_POINTS[taskName];
   const label = TASK_LABELS[taskName];
 
+  if (taskName === "WILDY_BOSSES" || taskName === "RAIDS") {
+    // console.log(taskName, tierStates);
+  }
+
   // Count completed tiers
   const completedTiers = tierStates.filter(
-    (t) => t.state === "COMPLETE"
+    (t) => t.state === "COMPLETE",
   ).length;
 
   // Calculate earned points
-  const earnedPoints = points.slice(0, completedTiers).reduce((a, b) => a + b, 0);
+  const earnedPoints = points
+    .slice(0, completedTiers)
+    .reduce((a, b) => a + b, 0);
   const totalPoints = points.reduce((a, b) => a + b, 0);
 
   // Determine tile state for styling
@@ -35,7 +41,7 @@ export function BingoTile({ taskName, tierStates, className }: BingoTileProps) {
         isFullyComplete && "bg-emerald-900/40 border-emerald-500",
         isPartiallyComplete && "bg-amber-900/30 border-amber-500/70",
         isNotStarted && "bg-slate-800/50 border-slate-600/50",
-        className
+        className,
       )}
     >
       {/* Task name */}
@@ -48,7 +54,7 @@ export function BingoTile({ taskName, tierStates, className }: BingoTileProps) {
         {Array.from({ length: totalTiers }, (_, i) => {
           const tier = i + 1;
           const tierState = tierStates.find(
-            (t) => t.taskId % 4 === tier || tierStates.indexOf(t) === i
+            (t) => t.taskId % 4 === tier || tierStates.indexOf(t) === i,
           );
           const state = tierStates[i]?.state || "INCOMPLETE";
 
@@ -59,7 +65,7 @@ export function BingoTile({ taskName, tierStates, className }: BingoTileProps) {
                 "flex-1 h-2 rounded-full transition-colors",
                 state === "COMPLETE" && "bg-emerald-500",
                 state === "INCOMPLETE" && "bg-slate-500",
-                state === "BLOCKED" && "bg-slate-700"
+                state === "BLOCKED" && "bg-slate-700",
               )}
               title={`Tier ${tier}: ${state} (${points[i]} pts)`}
             />
@@ -77,7 +83,7 @@ export function BingoTile({ taskName, tierStates, className }: BingoTileProps) {
             "text-sm font-bold",
             isFullyComplete && "text-emerald-400",
             isPartiallyComplete && "text-amber-400",
-            isNotStarted && "text-slate-500"
+            isNotStarted && "text-slate-500",
           )}
         >
           {earnedPoints}/{totalPoints} pts

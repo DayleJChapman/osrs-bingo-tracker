@@ -1,10 +1,31 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { mockTaskDetails, type TaskDetail } from "@/lib/mock-tasks-data";
-import { TASK_TIERS } from "@/types";
+import { mockTaskDetails } from "@/lib/mock-tasks-data";
+import { useTaskDetails } from "@/hooks/useTasks";
+import type { TaskDetail } from "@/types";
 
 export function Tasks() {
-  const [selectedTask, setSelectedTask] = useState<TaskDetail>(mockTaskDetails[0]!);
+  const { data: taskDetails, loading, error } = useTaskDetails();
+  const [selectedTask, setSelectedTask] = useState(taskDetails?.delve);
+
+  if (loading) {
+    return (
+      <div className="py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-slate-600 animate-pulse">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !taskDetails)
+    return (
+      <div className="py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-red-500">Error loading teams: {error}</div>
+        </div>
+      </div>
+    );
 
   return (
     <div className="py-8 px-4">
@@ -23,7 +44,7 @@ export function Tasks() {
             <h2 className="text-lg font-semibold text-slate-700 mb-3">
               All Tasks
             </h2>
-            {mockTaskDetails.map((task) => (
+            {Object.values(taskDetails).map((task) => (
               <button
                 key={task.name}
                 onClick={() => setSelectedTask(task)}
@@ -31,7 +52,7 @@ export function Tasks() {
                   "w-full text-left p-4 rounded-lg border-2 transition-all",
                   selectedTask?.name === task.name
                     ? "bg-slate-800 border-slate-700 text-white"
-                    : "bg-white border-slate-200 text-slate-900 hover:border-slate-400"
+                    : "bg-white border-slate-200 text-slate-900 hover:border-slate-400",
                 )}
               >
                 <div className="font-semibold">{task.label}</div>
@@ -40,11 +61,15 @@ export function Tasks() {
                     "text-sm mt-1",
                     selectedTask?.name === task.name
                       ? "text-slate-400"
-                      : "text-slate-500"
+                      : "text-slate-500",
                   )}
                 >
-                  {task.tiers.length} tiers |{" "}
-                  {task.tiers.reduce((sum, t) => sum + t.points, 0)} total pts
+                  {Object.keys(task.tiers).length} tiers |{" "}
+                  {Object.values(task.tiers).reduce(
+                    (sum, t) => sum + t.points,
+                    0,
+                  )}{" "}
+                  total pts
                 </div>
               </button>
             ))}
@@ -52,7 +77,7 @@ export function Tasks() {
 
           {/* Task Detail */}
           <div className="lg:col-span-2">
-            <TaskDetailView task={selectedTask} />
+            {selectedTask && <TaskDetailView task={selectedTask} />}
           </div>
         </div>
       </div>
@@ -61,7 +86,10 @@ export function Tasks() {
 }
 
 function TaskDetailView({ task }: { task: TaskDetail }) {
-  const totalPoints = task.tiers.reduce((sum, t) => sum + t.points, 0);
+  const totalPoints = Object.values(task.tiers).reduce(
+    (sum, t) => sum + t.points,
+    0,
+  );
 
   return (
     <div className="space-y-6">
@@ -84,9 +112,9 @@ function TaskDetailView({ task }: { task: TaskDetail }) {
       {/* Tiers */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-slate-700">Tiers</h3>
-        {task.tiers.map((tier) => (
+        {Object.entries(task.tiers).map(([i, tier]) => (
           <div
-            key={tier.tier}
+            key={i}
             className="bg-white rounded-lg border border-slate-200 p-5"
           >
             <div className="flex items-center justify-between mb-3">
@@ -94,17 +122,15 @@ function TaskDetailView({ task }: { task: TaskDetail }) {
                 <span
                   className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
-                    tier.tier === 1 && "bg-amber-100 text-amber-700",
-                    tier.tier === 2 && "bg-slate-200 text-slate-700",
-                    tier.tier === 3 && "bg-orange-100 text-orange-700",
-                    tier.tier === 4 && "bg-purple-100 text-purple-700"
+                    i === "1" && "bg-amber-100 text-amber-700",
+                    i === "2" && "bg-slate-200 text-slate-700",
+                    i === "3" && "bg-orange-100 text-orange-700",
+                    i === "3" && "bg-purple-100 text-purple-700",
                   )}
                 >
-                  {tier.tier}
+                  {i}
                 </span>
-                <span className="font-semibold text-slate-900">
-                  Tier {tier.tier}
-                </span>
+                <span className="font-semibold text-slate-900">Tier {i}</span>
               </div>
               <span className="text-lg font-bold text-emerald-600">
                 +{tier.points} pts

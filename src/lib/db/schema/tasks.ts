@@ -4,7 +4,7 @@ import { teams } from "./teams";
 
 export const tasks = sqliteTable("tasks", {
   id: int().primaryKey(),
-  name: text().notNull(),
+  name: text().notNull().unique(),
   label: text().default(""),
   description: text().default(""),
 });
@@ -34,14 +34,18 @@ export const taskMetadataRelations = relations(taskMetadata, ({ one }) => ({
   }),
 }));
 
-export const tiers = sqliteTable("tiers", {
-  id: int().primaryKey(),
-  taskId: int().notNull(),
-  number: int().notNull(),
-  description: text().default(""),
-  points: int().notNull(),
-  requirements: text({ mode: "json" }).$type<string[]>().default([]),
-});
+export const tiers = sqliteTable(
+  "tiers",
+  {
+    id: int().primaryKey(),
+    taskId: int().notNull(),
+    number: int().notNull(),
+    description: text().default(""),
+    points: int().notNull(),
+    requirements: text({ mode: "json" }).$type<string[]>().default([]),
+  },
+  (t) => [unique().on(t.taskId, t.number)],
+);
 
 export const tiersRelations = relations(tiers, ({ one }) => ({
   task: one(tasks, {

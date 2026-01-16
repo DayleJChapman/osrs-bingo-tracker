@@ -57,6 +57,13 @@
       "when": 1768508377685,
       "tag": "0007_omniscient_queen_noir",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1768580756433,
+      "tag": "0008_windy_gambit",
+      "breakpoints": true
     }
   ]
 }

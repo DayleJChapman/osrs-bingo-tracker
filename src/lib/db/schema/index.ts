@@ -1,9 +1,18 @@
 import { bossKc } from "./bosses";
 import { drops } from "./drops";
 import { xpGains } from "./gains";
-import { players } from "./players";
-import { taskMetadata, tasks, tiers, tierCompletionStates } from "./tasks";
-import { teams } from "./teams";
+import { players, playersRelations } from "./players";
+import {
+  taskMetadata,
+  tasks,
+  tiers,
+  tierCompletionStates,
+  taskMetadataRelations,
+  tasksRelations,
+  tierCompletionStatesRelations,
+  tiersRelations,
+} from "./tasks";
+import { teams, teamsRelations } from "./teams";
 
 export {
   bossKc,
@@ -15,4 +24,10 @@ export {
   taskMetadata,
   tiers,
   tierCompletionStates,
+  playersRelations,
+  teamsRelations,
+  taskMetadataRelations,
+  tierCompletionStatesRelations,
+  tasksRelations,
+  tiersRelations,
 };

@@ -9,7 +9,8 @@ RUN bun install
 
 COPY . .
 
-RUN bun run db:seed
+RUN bun run db:migrate && \
+  bun run db:seed
 
 FROM oven/bun:1.3 AS release
 ARG dir=/opt/osrs-bingo-tracker

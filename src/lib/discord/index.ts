@@ -1,3 +1,4 @@
+import type { MessageEmbeds } from "./messages";
 import mockData from "./mock-data.json";
 
 export type DiscordMessageUser = {
@@ -50,4 +51,31 @@ export function getMockData(afterId?: string) {
     return [];
   }
   return mockData;
+}
+
+export async function sendWebhookMessage(content: MessageEmbeds) {
+  const BASE_URL = Bun.env["DISCORD_WEBHOOK"];
+  if (!BASE_URL) throw new Error("Missing DISCORD_WEBHOOK");
+
+  try {
+    const response = await fetch(BASE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json; charset=UTF-8",
+        "User-Agent": `DiscordBot (https://github.com/DayleJChapman/osrs-bingo-tracker, v0.0.1)`,
+      },
+      body: JSON.stringify({
+        tts: false,
+        embeds: [{ ...content }],
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    console.log("Message sent");
+  } catch (error) {
+    console.error(error);
+  }
 }

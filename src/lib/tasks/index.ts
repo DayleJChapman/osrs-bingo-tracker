@@ -13,6 +13,8 @@ import {
 import { taskList } from "./task";
 import { incr } from "../utils";
 import type { TaskStates } from "../db/schema/tasks";
+import { messageBuilder } from "../discord/messages";
+import { sendWebhookMessage } from "../discord";
 
 export async function checkTeamTasks(teamId: number) {
   console.log(`Checking status for team id ${teamId}`);
@@ -41,6 +43,8 @@ export async function checkTeamTasks(teamId: number) {
     for (const [i, tierData] of Object.entries(task.tiers)) {
       const taskData = await getTaskByName(task.name);
       if (!taskData) throw new Error("Could not find task data");
+      const currentState = await getTierState(teamId, taskData.id, Number(i));
+      console.log(`${taskData.name} ${i}:`, currentState);
 
       const isComplete = await tierData.isComplete({
         drops: filteredDrops,
@@ -70,10 +74,29 @@ export async function checkTeamTasks(teamId: number) {
       });
 
       prevTierState = state;
+
+      if (currentState !== "COMPLETE" && state === "COMPLETE") {
+        const teamName = await getTeamName(teamId);
+        const messageData = messageBuilder.tierComplete({
+          team: teamName,
+          task: task,
+          tier: tierData,
+          number: Number(i),
+        });
+        await sendWebhookMessage(messageData);
+      }
     }
   }
 
   console.log(`Done checking task status for team ${teamId}`);
+}
+
+async function getTeamName(teamId: number) {
+  const res = await db
+    .select({ name: teams.name })
+    .from(teams)
+    .where(eq(teams.id, teamId));
+  return res[0]?.name ?? "";
 }
 
 async function getTierId(taskId: number, tier: number) {
@@ -116,7 +139,11 @@ async function addTaskPoints(teamId: number, points: number) {
     .where(eq(teams.id, teamId));
 }
 
-async function getTierState(teamId: number, taskId: number, tier: number) {
+export async function getTierState(
+  teamId: number,
+  taskId: number,
+  tier: number,
+) {
   const tierData = await db
     .select({ tierId: tiers.id })
     .from(tiers)

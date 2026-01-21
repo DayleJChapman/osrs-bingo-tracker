@@ -17,7 +17,7 @@ type TaskMetadataFormProps = {
   teamId: number;
   teamName: string;
   initialData?: Partial<TaskMetadataMap>;
-  onSave: (data: TaskMetadataMap) => void;
+  onSave: (data: TaskMetadataMap) => Promise<boolean>;
   onLogout: () => void;
 };
 
@@ -54,11 +54,11 @@ export function TaskMetadataForm({
 
   const handleSave = async () => {
     setSaving(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    onSave(metadata);
+    const success = await onSave(metadata);
     setSaving(false);
-    setSaved(true);
+    if (success) {
+      setSaved(true);
+    }
   };
 
   return (

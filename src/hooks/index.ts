@@ -7,5 +7,8 @@ export { useTeams, useTeamsWithMembers } from "./useTeams";
 // Task hooks
 export { useTeamTasks, useAllTeamTasks } from "./useTasks";
 
+// Task metadata hooks
+export { useTaskMetadata, saveTaskMetadata, type TaskMetadataState } from "./useTaskMetadata";
+
 // Scoreboard hooks
 export { useScoreboardData } from "./useScoreboard";

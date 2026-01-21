@@ -1,6 +1,7 @@
 import { serve } from "bun";
 import index from "./index.html";
 import { hono } from "./server";
+import { scheduledJobs } from "./lib/poller";
 
 const server = serve({
   routes: {
@@ -20,9 +21,5 @@ const server = serve({
   },
 });
 
-const pollerProc = Bun.spawn({
-  cmd: ["bun", "./src/lib/poller"],
-  stdout: "inherit",
-});
-
 console.log(`🚀 Server running at ${server.url}`);
+console.log(`📅 ${scheduledJobs.length} scheduled jobs active`);

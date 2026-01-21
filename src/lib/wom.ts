@@ -13,11 +13,34 @@ export const womClient = new WOMClient({
   userAgent: username,
 });
 
+// Delay between API requests to avoid rate limiting (in ms)
+const API_REQUEST_DELAY = 1000;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function scrapeWOM() {
   console.log("Updating data from WOM");
   const queryResult = await db.select().from(players);
 
-  await Promise.all(queryResult.map(handleUpdatePlayer));
+  // Process players sequentially with delay to avoid rate limiting
+  for (let i = 0; i < queryResult.length; i++) {
+    const player = queryResult[i];
+    console.log(`Fetching WOM data for ${player.username} (${i + 1}/${queryResult.length})`);
+
+    try {
+      await handleUpdatePlayer(player);
+    } catch (error) {
+      console.error(`Failed to update player ${player.username}:`, error);
+    }
+
+    // Add delay between requests (skip delay after last player)
+    if (i < queryResult.length - 1) {
+      await sleep(API_REQUEST_DELAY);
+    }
+  }
+
   console.log("Done updating data from WOM");
 }
 

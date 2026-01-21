@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: app
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      SQLITE_FILENAME: sqlite.db
+      WOM_COMP_ID: ${WOM_COMP_ID:?error}
+      DISCORD_USERNAME: ${DISCORD_USERNAME:?error}
+      DISCORD_TOKEN: ${DISCORD_TOKEN:?error}
+      DISCORD_CHANNEL: ${DISCORD_CHANNEL:?error}
+      DISCORD_WEBHOOK: ${DISCORD_WEBHOOK:?error}
+    ports:
+      - 3000:3000

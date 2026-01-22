@@ -1,10 +1,13 @@
 import { db } from "@/lib/db";
-import { drops, teams, tierCompletionStates, taskMetadata, tasks } from "@/lib/db/schema";
+import { drops, teams, tierCompletionStates, taskMetadata, tasks, tiers } from "@/lib/db/schema";
 import type { TaskStates } from "@/lib/db/schema/tasks";
 import { and, eq } from "drizzle-orm";
 import { verifyTeamKey } from "@/server/auth";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { messageBuilder } from "@/lib/discord/messages";
+import { sendWebhookMessage } from "@/lib/discord";
+import { taskList } from "@/lib/tasks/task";
 
 const teamsRouter = new Hono();
 
@@ -93,6 +96,103 @@ teamsRouter.get("/:teamId/tasks", async (c) => {
 
   console.log(queryRes);
   return c.json(queryRes);
+});
+
+// Update tier completion state for a team
+teamsRouter.put("/:teamId/tiers/:tierId", async (c) => {
+  const { teamId, tierId } = c.req.param();
+  if (Number.isNaN(Number(teamId))) {
+    throw new HTTPException(422, { message: `Invalid teamId ${teamId}` });
+  }
+  if (Number.isNaN(Number(tierId))) {
+    throw new HTTPException(422, { message: `Invalid tierId ${tierId}` });
+  }
+
+  // Verify authentication
+  const authHeader = c.req.header("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new HTTPException(401, { message: "Missing or invalid authorization header" });
+  }
+  const key = authHeader.slice(7);
+  if (!verifyTeamKey(Number(teamId), key)) {
+    throw new HTTPException(403, { message: "Invalid team key" });
+  }
+
+  // Verify team exists
+  const team = await db.query.teams.findFirst({
+    where: eq(teams.id, Number(teamId)),
+  });
+  if (!team) {
+    throw new HTTPException(404, { message: `No team found with id ${teamId}` });
+  }
+
+  // Verify tier exists
+  const tier = await db.query.tiers.findFirst({
+    where: eq(tiers.id, Number(tierId)),
+  });
+  if (!tier) {
+    throw new HTTPException(404, { message: `No tier found with id ${tierId}` });
+  }
+
+  // Parse and validate request body
+  const body = await c.req.json<{ state: string }>();
+  if (!body.state || !["COMPLETE", "INCOMPLETE", "BLOCKED"].includes(body.state)) {
+    throw new HTTPException(422, { message: "Invalid state. Must be COMPLETE, INCOMPLETE, or BLOCKED" });
+  }
+
+  // Find existing completion state record
+  const existing = await db.query.tierCompletionStates.findFirst({
+    where: and(
+      eq(tierCompletionStates.tierId, Number(tierId)),
+      eq(tierCompletionStates.teamId, Number(teamId)),
+    ),
+  });
+
+  const previousState = existing?.state ?? "INCOMPLETE";
+  const newState = body.state as TaskStates;
+
+  if (existing) {
+    // Update existing record
+    await db
+      .update(tierCompletionStates)
+      .set({ state: newState })
+      .where(eq(tierCompletionStates.id, existing.id));
+  } else {
+    // Insert new record
+    await db.insert(tierCompletionStates).values({
+      taskId: tier.taskId,
+      tierId: Number(tierId),
+      teamId: Number(teamId),
+      state: newState,
+    });
+  }
+
+  // Send notification if tier was just marked as complete
+  if (newState === "COMPLETE" && previousState !== "COMPLETE") {
+    // Get task name from database
+    const task = await db.query.tasks.findFirst({
+      where: eq(tasks.id, tier.taskId),
+    });
+
+    if (task) {
+      // Find the task in taskList by name
+      const taskData = Object.values(taskList).find((t) => t.name === task.name);
+      if (taskData) {
+        const tierData = taskData.tiers[tier.number as keyof typeof taskData.tiers];
+        if (tierData) {
+          const messageData = messageBuilder.tierComplete({
+            team: team.name,
+            task: taskData,
+            tier: tierData,
+            number: tier.number,
+          });
+          await sendWebhookMessage(messageData);
+        }
+      }
+    }
+  }
+
+  return c.json({ success: true });
 });
 
 // Verify team authentication

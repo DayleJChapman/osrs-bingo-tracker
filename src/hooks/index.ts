@@ -12,3 +12,6 @@ export { useTaskMetadata, saveTaskMetadata, type TaskMetadataState } from "./use
 
 // Scoreboard hooks
 export { useScoreboardData } from "./useScoreboard";
+
+// Tier state hooks
+export { useTierStates, saveTierState, type TierWithState, type TierStatesState } from "./useTierStates";

@@ -27,7 +27,11 @@ export async function scrapeWOM() {
   // Process players sequentially with delay to avoid rate limiting
   for (let i = 0; i < queryResult.length; i++) {
     const player = queryResult[i];
-    console.log(`Fetching WOM data for ${player.username} (${i + 1}/${queryResult.length})`);
+    if (!player) continue;
+
+    console.log(
+      `Fetching WOM data for ${player.username} (${i + 1}/${queryResult.length})`,
+    );
 
     try {
       await handleUpdatePlayer(player);
@@ -45,7 +49,14 @@ export async function scrapeWOM() {
 }
 
 async function getGains(username: string) {
-  return womClient.players.getPlayerGains(username, { period: Period.WEEK });
+  // new Date() constructs in current TZ which is stupid but whatever
+  const startDate = new Date(2026, 0, 22, 17);
+  const endDate = new Date(2026, 0, 26, 17);
+
+  return womClient.players.getPlayerGains(username, {
+    startDate,
+    endDate,
+  });
 }
 
 async function handleUpdatePlayer(player: {

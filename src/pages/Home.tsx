@@ -3,7 +3,6 @@ import { useScoreboardData } from "@/hooks";
 
 export function Home() {
   const { teams, taskStates, loading, error, refetch } = useScoreboardData();
-  console.log(taskStates);
 
   return (
     <div className="py-8 px-4">

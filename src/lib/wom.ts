@@ -27,7 +27,11 @@ export async function scrapeWOM() {
   // Process players sequentially with delay to avoid rate limiting
   for (let i = 0; i < queryResult.length; i++) {
     const player = queryResult[i];
-    console.log(`Fetching WOM data for ${player.username} (${i + 1}/${queryResult.length})`);
+    if (!player) continue;
+
+    console.log(
+      `Fetching WOM data for ${player.username} (${i + 1}/${queryResult.length})`,
+    );
 
     try {
       await handleUpdatePlayer(player);

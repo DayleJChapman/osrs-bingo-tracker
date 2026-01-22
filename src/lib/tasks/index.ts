@@ -44,7 +44,7 @@ export async function checkTeamTasks(teamId: number) {
       const taskData = await getTaskByName(task.name);
       if (!taskData) throw new Error("Could not find task data");
       const currentState = await getTierState(teamId, taskData.id, Number(i));
-      console.log(`${taskData.name} ${i}:`, currentState);
+      if (currentState === "COMPLETE") continue;
 
       const isComplete = await tierData.isComplete({
         drops: filteredDrops,
@@ -75,7 +75,7 @@ export async function checkTeamTasks(teamId: number) {
 
       prevTierState = state;
 
-      if (currentState !== "COMPLETE" && state === "COMPLETE") {
+      if (state === "COMPLETE") {
         const teamName = await getTeamName(teamId);
         const messageData = messageBuilder.tierComplete({
           team: teamName,

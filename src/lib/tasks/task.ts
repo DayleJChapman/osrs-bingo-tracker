@@ -18,6 +18,7 @@ export const taskList = {
     name: "DELVE",
     label: "Delve Tile",
     description: descriptions.delve.task,
+    requirements: descriptions.delve.requirements,
     drops: ["mokhaiotl cloth", "eye of ayak (uncharged)", "avernic treads"],
     skills: [],
     bosses: [],
@@ -29,14 +30,14 @@ export const taskList = {
         isComplete: handlers.delve.tierOne,
       },
       2: {
-        description: descriptions.delve.tiers[1].description,
-        requirements: descriptions.delve.tiers[1].requirements,
+        description: descriptions.delve.tiers[2].description,
+        requirements: descriptions.delve.tiers[2].requirements,
         points: 30,
         isComplete: handlers.delve.tierTwo,
       },
       3: {
-        description: descriptions.delve.tiers[1].description,
-        requirements: descriptions.delve.tiers[1].requirements,
+        description: descriptions.delve.tiers[3].description,
+        requirements: descriptions.delve.tiers[3].requirements,
         points: 40,
         isComplete: handlers.delve.tierThree,
       },
@@ -45,7 +46,8 @@ export const taskList = {
   wildy: {
     name: "WILDY_BOSSES",
     label: "Wildy Boss Tile",
-    description: "",
+    description: descriptions.wildy.task,
+    requirements: descriptions.wildy.requirements,
     drops: [
       "claws of callisto",
       "fangs of venenatis",
@@ -64,19 +66,19 @@ export const taskList = {
     tiers: {
       1: {
         description: "",
-        requirements: [],
+        requirements: descriptions.wildy.tiers[1].requirements,
         points: 30,
         isComplete: handlers.wildy.tierOne,
       },
       2: {
         description: "",
-        requirements: [],
+        requirements: descriptions.wildy.tiers[2].requirements,
         points: 15,
         isComplete: handlers.wildy.tierTwo,
       },
       3: {
         description: "",
-        requirements: [],
+        requirements: descriptions.wildy.tiers[3].requirements,
         points: 15,
         isComplete: handlers.wildy.tierThree,
       },
@@ -85,7 +87,8 @@ export const taskList = {
   pulling: {
     name: "PULLING",
     label: "Pulling Tile",
-    description: "",
+    description: descriptions.pulling.task,
+    requirements: descriptions.pulling.requirements,
     drops: [
       "catalytic talisman",
       "elemental talisman",
@@ -108,19 +111,19 @@ export const taskList = {
     tiers: {
       1: {
         description: "",
-        requirements: [],
+        requirements: descriptions.pulling.tiers[1].requirements,
         points: 30,
         isComplete: handlers.pulling.tierOne,
       },
       2: {
         description: "",
-        requirements: [],
+        requirements: descriptions.pulling.tiers[2].requirements,
         points: 30,
         isComplete: handlers.pulling.tierTwo,
       },
       3: {
         description: "",
-        requirements: [],
+        requirements: descriptions.pulling.tiers[3].requirements,
         points: 60,
         isComplete: handlers.pulling.tierThree,
       },
@@ -129,7 +132,8 @@ export const taskList = {
   cg: {
     name: "CG",
     label: "Corrupted Gauntlet Tile",
-    description: "",
+    description: descriptions.cg.task,
+    requirements: descriptions.cg.requirements,
     drops: [
       "crystal weapon seed",
       "crystal armour seed",
@@ -141,19 +145,19 @@ export const taskList = {
     tiers: {
       1: {
         description: "",
-        requirements: [],
+        requirements: descriptions.cg.tiers[1].requirements,
         points: 55,
         isComplete: handlers.cg.tierOne,
       },
       2: {
         description: "",
-        requirements: [],
+        requirements: descriptions.cg.tiers[2].requirements,
         points: 20,
         isComplete: handlers.cg.tierTwo,
       },
       3: {
         description: "",
-        requirements: [],
+        requirements: descriptions.cg.tiers[3].requirements,
         points: 10,
         isComplete: handlers.cg.tierThree,
       },
@@ -162,7 +166,7 @@ export const taskList = {
   dt2: {
     name: "DT2",
     label: "DT2 Bosses Tile",
-    description: "",
+    description: descriptions.dt2.task,
     drops: [
       "awakener's orb",
       "ice quartz",
@@ -187,19 +191,19 @@ export const taskList = {
     tiers: {
       1: {
         description: "",
-        requirements: [],
+        requirements: descriptions.dt2.tiers[1].requirements,
         points: 10,
         isComplete: handlers.dt2.tierOne,
       },
       2: {
         description: "",
-        requirements: [],
+        requirements: descriptions.dt2.tiers[2].requirements,
         points: 70,
         isComplete: handlers.dt2.tierTwo,
       },
       3: {
         description: "",
-        requirements: [],
+        requirements: descriptions.dt2.tiers[3].requirements,
         points: 80,
         isComplete: handlers.dt2.tierThree,
       },
@@ -208,7 +212,8 @@ export const taskList = {
   raids: {
     name: "RAIDS",
     label: "Raids Tile",
-    description: "",
+    description: descriptions.raids.task,
+    requirements: descriptions.raids.requirements,
     drops: [
       "masori mask",
       "masori body",
@@ -248,19 +253,19 @@ export const taskList = {
     tiers: {
       1: {
         description: "",
-        requirements: [],
+        requirements: descriptions.raids.tiers[1].requirements,
         points: 50,
         isComplete: handlers.raids.tierOne,
       },
       2: {
         description: "",
-        requirements: [],
+        requirements: descriptions.raids.tiers[2].requirements,
         points: 100,
         isComplete: handlers.raids.tierTwo,
       },
       3: {
         description: "",
-        requirements: [],
+        requirements: descriptions.raids.tiers[3].requirements,
         points: 50,
         isComplete: handlers.raids.tierThree,
       },
@@ -269,7 +274,8 @@ export const taskList = {
   slayer: {
     name: "GETTING_HEAD",
     label: "Getting Head Tile",
-    description: "",
+    description: descriptions.delve.task,
+    requirements: descriptions.delve.requirements,
     drops: [
       "imbued heart",
       "dragon warhammer",
@@ -292,19 +298,19 @@ export const taskList = {
     tiers: {
       1: {
         description: "",
-        requirements: [],
+        requirements: descriptions.slayer.tiers[1].requirements,
         points: 40,
         isComplete: handlers.slayer.tierOne,
       },
       2: {
         description: "",
-        requirements: [],
+        requirements: descriptions.slayer.tiers[2].requirements,
         points: 40,
         isComplete: handlers.slayer.tierTwo,
       },
       3: {
         description: "",
-        requirements: [],
+        requirements: descriptions.slayer.tiers[3].requirements,
         points: 70,
         isComplete: handlers.slayer.tierThree,
       },
@@ -313,7 +319,8 @@ export const taskList = {
   skilling: {
     name: "CONTRACT_SKILLER",
     label: "Contract (s)killer Tile",
-    description: "",
+    description: descriptions.skilling.task,
+    requirements: descriptions.skilling.requirements,
     drops: [
       "guild hunter headgear",
       "guild hunter top",
@@ -326,26 +333,25 @@ export const taskList = {
     tiers: {
       1: {
         description: "",
-
-        requirements: [],
+        requirements: descriptions.skilling.tiers[1].requirements,
         points: 15,
         isComplete: handlers.skilling.tierOne,
       },
       2: {
         description: "",
-        requirements: [],
+        requirements: descriptions.skilling.tiers[2].requirements,
         points: 25,
         isComplete: handlers.skilling.tierTwo,
       },
       3: {
         description: "",
-        requirements: [],
+        requirements: descriptions.skilling.tiers[3].requirements,
         points: 40,
         isComplete: handlers.skilling.tierThree,
       },
       4: {
         description: "",
-        requirements: [],
+        requirements: descriptions.skilling.tiers[4].requirements,
         points: 20,
         isComplete: handlers.skilling.tierThree,
       },
@@ -354,7 +360,7 @@ export const taskList = {
   rod: {
     name: "NICE_ROD",
     label: "Nice Rod Tile",
-    description: "",
+    description: descriptions.rod.task,
     drops: [
       "uncharged trident",
       "trident of the seas (full)",
@@ -366,19 +372,19 @@ export const taskList = {
     tiers: {
       1: {
         description: "",
-        requirements: [],
+        requirements: descriptions.rod.tiers[1].requirements,
         points: 25,
         isComplete: handlers.rod.tierOne,
       },
       2: {
         description: "",
-        requirements: [],
+        requirements: descriptions.rod.tiers[2].requirements,
         points: 35,
         isComplete: handlers.rod.tierTwo,
       },
       3: {
         description: "",
-        requirements: [],
+        requirements: descriptions.rod.tiers[3].requirements,
         points: 40,
         isComplete: handlers.rod.tierThree,
       },

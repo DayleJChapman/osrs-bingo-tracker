@@ -45,6 +45,7 @@ export type TaskDetail = {
   name: string;
   label: string;
   description: string;
+  requirements?: string[];
   bosses: string[];
   skills: string[];
   drops: string[];

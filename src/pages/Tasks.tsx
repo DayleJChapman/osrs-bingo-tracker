@@ -107,6 +107,26 @@ function TaskDetailView({ task }: { task: TaskDetail }) {
             <div className="text-sm text-slate-400">total points</div>
           </div>
         </div>
+
+        {/* Overall Task Requirements */}
+        {task.requirements && task.requirements.length > 0 && (
+          <div className="mt-6 pt-6 border-t border-slate-700">
+            <h3 className="text-sm font-semibold text-slate-300 mb-3">
+              Task Requirements
+            </h3>
+            <ul className="space-y-2">
+              {task.requirements.map((req, idx) => (
+                <li
+                  key={idx}
+                  className="text-sm text-slate-300 flex items-start gap-2"
+                >
+                  <span className="text-slate-500 mt-0.5">•</span>
+                  <span>{req}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {/* Tiers */}

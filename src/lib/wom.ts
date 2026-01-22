@@ -45,7 +45,14 @@ export async function scrapeWOM() {
 }
 
 async function getGains(username: string) {
-  return womClient.players.getPlayerGains(username, { period: Period.WEEK });
+  // new Date() constructs in current TZ which is stupid but whatever
+  const startDate = new Date(2026, 0, 22, 17);
+  const endDate = new Date(2026, 0, 26, 17);
+
+  return womClient.players.getPlayerGains(username, {
+    startDate,
+    endDate,
+  });
 }
 
 async function handleUpdatePlayer(player: {
